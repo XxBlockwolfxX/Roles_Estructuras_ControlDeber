@@ -1,0 +1,148 @@
+﻿@model IEnumerable<Roles_Estructuras_Control.Models.ClientesModel>
+
+@{
+    ViewData["Title"] = "Gestión de Clientes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Gestión de Clientes</h2>
+
+<!-- Formulario para agregar o editar clientes -->
+<div class="mb-3">
+    <h3 id="form-title">Agregar Cliente</h3>
+    <input type="hidden" id="cliente-id">
+    <input type="text" id="cliente-nombre" placeholder="Nombre" class="form-control mb-2">
+    <input type="email" id="cliente-email" placeholder="Email" class="form-control mb-2">
+    <input type="text" id="cliente-telefono" placeholder="Teléfono" class="form-control mb-2">
+    <button id="btn-guardar" class="btn btn-primary">Guardar</button>
+    <button id="btn-cancelar" class="btn btn-secondary">Cancelar</button>
+</div>
+
+<!-- Tabla de clientes -->
+<table id="tabla-clientes" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Aquí se insertarán los clientes dinámicamente con JavaScript -->
+    </tbody>
+</table>
+
+<!-- Cargar jQuery si aún no está en el proyecto -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(() => {
+        cargarClientes();
+
+        // Guardar cliente (nuevo o edición)
+        $("#btn-guardar").click(() => {
+            let id = $("#cliente-id").val();
+            let cliente = {
+                nombre: $("#cliente-nombre").val(),
+                email: $("#cliente-email").val(),
+                telefono: $("#cliente-telefono").val()
+            };
+
+            if (id) {
+                actualizarCliente(id, cliente);
+            } else {
+                crearCliente(cliente);
+            }
+        });
+
+        // Cancelar edición
+        $("#btn-cancelar").click(() => {
+            limpiarFormulario();
+        });
+    });
+
+    // Cargar clientes en la tabla
+    function cargarClientes() {
+        $.get("../../Clientes/ListaClientes", (clientes) => {
+            let html = "";
+            $.each(clientes, (index, cliente) => {
+                html += `
+                    <tr>
+                        <td>${cliente.id}</td>
+                        <td>${cliente.nombre}</td>
+                        <td>${cliente.email}</td>
+                        <td>${cliente.telefono}</td>
+                        <td>
+                            <button onclick="editarCliente(${cliente.id}, '${cliente.nombre}', '${cliente.email}', '${cliente.telefono}')" class="btn btn-warning">Editar</button>
+                            <button onclick="eliminarCliente(${cliente.id})" class="btn btn-danger">Eliminar</button>
+                        </td>
+                    </tr>`;
+            });
+            $("#tabla-clientes tbody").html(html);
+        });
+    }
+
+    // Crear un nuevo cliente
+    function crearCliente(cliente) {
+        $.ajax({
+            url: "../../Clientes/CreateCliente",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(cliente),
+            success: function () {
+                alert("Cliente agregado");
+                cargarClientes();
+                limpiarFormulario();
+            }
+        });
+    }
+
+    // Actualizar un cliente existente
+    function actualizarCliente(id, cliente) {
+        $.ajax({
+            url: `../../Clientes/UpdateCliente?id=${id}`,
+            type: "PUT",
+            contentType: "application/json",
+            data: JSON.stringify(cliente),
+            success: function () {
+                alert("Cliente actualizado");
+                cargarClientes();
+                limpiarFormulario();
+            }
+        });
+    }
+
+    // Eliminar cliente
+    function eliminarCliente(id) {
+        if (!confirm("¿Seguro que deseas eliminar este cliente?")) return;
+
+        $.ajax({
+            url: `../../Clientes/DeleteCliente?id=${id}`,
+            type: "DELETE",
+            success: function () {
+                alert("Cliente eliminado");
+                cargarClientes();
+            }
+        });
+    }
+
+    // Rellenar el formulario con datos del cliente para editar
+    function editarCliente(id, nombre, email, telefono) {
+        $("#cliente-id").val(id);
+        $("#cliente-nombre").val(nombre);
+        $("#cliente-email").val(email);
+        $("#cliente-telefono").val(telefono);
+        $("#form-title").text("Editar Cliente");
+    }
+
+    // Limpiar formulario y restaurar a estado de "Agregar Cliente"
+    function limpiarFormulario() {
+        $("#cliente-id").val("");
+        $("#cliente-nombre").val("");
+        $("#cliente-email").val("");
+        $("#cliente-telefono").val("");
+        $("#form-title").text("Agregar Cliente");
+    }
+</script>

@@ -181,46 +181,6 @@ namespace Roles_Estructuras_Control.Controllers
         {
             return _context.DetalleFactura.Any(e => e.Id == id);
         }
-    
-
-    //Prueba para crear crud
-[HttpPost]
-        public async Task<IActionResult> CreateCliente([FromBody] ClientesModel cliente)
-        {
-            if (cliente == null)
-                return BadRequest("Datos inválidos");
-
-            _context.Clientes.Add(cliente);
-            await _context.SaveChangesAsync();
-            return Ok(cliente);
-        }
-
-        [HttpPut]
-        public async Task<IActionResult> UpdateCliente(int id, [FromBody] ClientesModel cliente)
-        {
-            var clienteExistente = await _context.Clientes.FindAsync(id);
-            if (clienteExistente == null)
-                return NotFound();
-
-            clienteExistente.Nombre = cliente.Nombre;
-            clienteExistente.Email = cliente.Email;
-            clienteExistente.Telefono = cliente.Telefono;
-
-            await _context.SaveChangesAsync();
-            return Ok(clienteExistente);
-        }
-
-        [HttpDelete]
-        public async Task<IActionResult> DeleteCliente(int id)
-        {
-            var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente == null)
-                return NotFound();
-
-            _context.Clientes.Remove(cliente);
-            await _context.SaveChangesAsync();
-            return Ok();
-        }
 
     }
 }
