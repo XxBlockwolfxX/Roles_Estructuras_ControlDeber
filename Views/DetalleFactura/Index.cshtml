@@ -1,0 +1,217 @@
+﻿@model IEnumerable<Roles_Estructuras_Control.Models.DetalleFacturaModel>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<h1>Index</h1>
+
+<script>
+    $(document).ready(() => {
+        var html = "";
+        $.get("../../detallefactura/ListaClientes", (listaclientes) => {
+            $.each(listaclientes, (index, cliente) => {
+                html += `
+                    <tr>
+                        <td>${cliente.id}</td>
+                        <td>${cliente.nombre}</td>
+                        <td>${cliente.email}</td>
+                        <td>${cliente.telefono}</td>
+                    </tr>`;
+            });
+
+            $("#tabla-clientes tbody").html(html);
+        });
+    });
+</script>
+
+
+<!---<div class="row-cols-2">
+    <div class="col-md-6">
+        <label class="control-label">Clientes</label>
+        <select class="form-select" id="clientes">
+
+        </select>
+    </div>
+</div>-->
+
+
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<!--<table class="table table-responsive table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Cantidad)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Valor)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProductoModels.NombreProducto)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FacturaModel.NumeroFactura)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StockModels.FechaFabricacion)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Cantidad)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Valor)
+            </td>
+            <td>
+
+                @Html.DisplayFor(modelItem => item.ProductoModels.NombreProducto)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FacturaModel.NumeroFactura)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StockModels.FechaFabricacion)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>-->
+
+<h2>Lista de Clientes</h2>
+<table id="tabla-clientes" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Aquí se insertarán los clientes dinámicamente con JavaScript -->
+    </tbody>
+</table>
+
+<!-- Formulario para agregar o editar cliente -->
+<div>
+    <h3 id="form-title">Agregar Cliente</h3>
+    <input type="hidden" id="cliente-id">
+    <input type="text" id="cliente-nombre" placeholder="Nombre" class="form-control">
+    <input type="email" id="cliente-email" placeholder="Email" class="form-control">
+    <input type="text" id="cliente-telefono" placeholder="Teléfono" class="form-control">
+    <button id="btn-guardar" class="btn btn-primary">Guardar</button>
+</div>
+
+<script>
+    $(document).ready(() => {
+        cargarClientes();
+
+        // Guardar nuevo cliente o actualizar
+        $("#btn-guardar").click(() => {
+            let id = $("#cliente-id").val();
+            let cliente = {
+                nombre: $("#cliente-nombre").val(),
+                email: $("#cliente-email").val(),
+                telefono: $("#cliente-telefono").val()
+            };
+
+            if (id) {
+                actualizarCliente(id, cliente);
+            } else {
+                crearCliente(cliente);
+            }
+        });
+    });
+
+    function cargarClientes() {
+        $.get("../../detallefactura/ListaClientes", (listaclientes) => {
+            let html = "";
+            $.each(listaclientes, (index, cliente) => {
+                html += `
+                    <tr>
+                        <td>${cliente.id}</td>
+                        <td>${cliente.nombre}</td>
+                        <td>${cliente.email}</td>
+                        <td>${cliente.telefono}</td>
+                        <td>
+                            <button onclick="editarCliente(${cliente.id}, '${cliente.nombre}', '${cliente.email}', '${cliente.telefono}')" class="btn btn-warning">Editar</button>
+                            <button onclick="eliminarCliente(${cliente.id})" class="btn btn-danger">Eliminar</button>
+                        </td>
+                    </tr>`;
+            });
+            $("#tabla-clientes tbody").html(html);
+        });
+    }
+
+    function crearCliente(cliente) {
+        $.ajax({
+            url: "../../detallefactura/CreateCliente",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(cliente),
+            success: function () {
+                alert("Cliente agregado");
+                cargarClientes();
+                limpiarFormulario();
+            }
+        });
+    }
+
+    function actualizarCliente(id, cliente) {
+        $.ajax({
+            url: `../../detallefactura/UpdateCliente?id=${id}`,
+            type: "PUT",
+            contentType: "application/json",
+            data: JSON.stringify(cliente),
+            success: function () {
+                alert("Cliente actualizado");
+                cargarClientes();
+                limpiarFormulario();
+            }
+        });
+    }
+
+    function eliminarCliente(id) {
+        if (!confirm("¿Seguro que deseas eliminar este cliente?")) return;
+
+        $.ajax({
+            url: `../../detallefactura/DeleteCliente?id=${id}`,
+            type: "DELETE",
+            success: function () {
+                alert("Cliente eliminado");
+                cargarClientes();
+            }
+        });
+    }
+
+    function editarCliente(id, nombre, email, telefono) {
+        $("#cliente-id").val(id);
+        $("#cliente-nombre").val(nombre);
+        $("#cliente-email").val(email);
+        $("#cliente-telefono").val(telefono);
+        $("#form-title").text("Editar Cliente");
+    }
+
+    function limpiarFormulario() {
+        $("#cliente-id").val("");
+        $("#cliente-nombre").val("");
+        $("#cliente-email").val("");
+        $("#cliente-telefono").val("");
+        $("#form-title").text("Agregar Cliente");
+    }
+</script>
