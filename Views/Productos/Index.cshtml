@@ -1,48 +1,112 @@
 ﻿@model IEnumerable<Roles_Estructuras_Control.Models.ProductoModels>
 
 @{
-    ViewData["Title"] = "Index";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Productos";
 }
 
-<h1>Index</h1>
+<h1>Listado de Productos</h1>
 
+<!-- Buscador por nombre -->
+<div class="form-group mb-3">
+    <input type="text" id="buscadorProducto" class="form-control" placeholder="Buscar producto por nombre..." />
+</div>
+
+<!-- Botón para crear nuevo producto -->
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Crear Nuevo Producto</a>
 </p>
-<table class="table">
+<!-- Botón para abrir la modal -->
+<button type="button" class="btn btn-secondary mb-3" data-bs-toggle="modal" data-bs-target="#modalProductos">
+    Buscar producto
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="modalProductos" tabindex="-1" aria-labelledby="modalProductosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalProductosLabel">Seleccionar Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="buscadorProducto" class="form-control mb-3" placeholder="Buscar producto por nombre...">
+
+                <table class="table table-bordered" id="tablaProductos">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Presentación</th>
+                            <th>Código</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.NombreProducto</td>
+                                <td>@item.Presentacion</td>
+                                <td>@item.CodigoBarras</td>
+                                <td>
+                                    <button type="button" class="btn btn-success btn-sm seleccionar-producto"
+                                            data-nombre="@item.NombreProducto"
+                                            data-presentacion="@item.Presentacion"
+                                            data-codigo="@item.CodigoBarras">
+                                        Seleccionar
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h4>Productos Seleccionados</h4>
+<table class="table table-striped" id="tablaPrincipal">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.NombreProducto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Presentacion)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CodigoBarras)
-            </th>
-            <th></th>
+            <th>Nombre</th>
+            <th>Presentación</th>
+            <th>Código</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.NombreProducto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Presentacion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CodigoBarras)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        <!-- Se llenará dinámicamente con JS -->
     </tbody>
 </table>
+
+
+<!-- Tabla con ID para filtro -->
+<table class="table table-bordered" id="tablaProductos">
+    <thead class="table-light">
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.First().NombreProducto)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Presentacion)</th>
+            <th>@Html.DisplayNameFor(model => model.First().CodigoBarras)</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.NombreProducto)</td>
+                <td>@Html.DisplayFor(modelItem => item.Presentacion)</td>
+                <td>@Html.DisplayFor(modelItem => item.CodigoBarras)</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Editar</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Detalles</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Incluir JS personalizado -->
+@section Scripts {
+    <script src="~/js/productos.js"></script>
+}
